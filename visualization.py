@@ -1,4 +1,3 @@
-import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter, QColor, QLinearGradient, QBrush
 
@@ -16,7 +15,7 @@ class MyWidget(QtWidgets.QWidget):
         self.show()
 
     def paintEvent(self, event):
-        side = min(self.width(), self.height()) / self.block_count
+        side = min(self.width(), self.height()) / self.block_count  # scalable side blocks
         if side > self.block_default_side:
             side = self.block_default_side
 
@@ -36,7 +35,7 @@ class MyWidget(QtWidgets.QWidget):
         qp.end()
 
     @staticmethod
-    def draw_block(qp, x, y, side_size, type, origin):
+    def draw_block(qp, x, y, side_size, type, origin):  # drawing a block with alignment relative to the center of the image
         col = QColor(255, 255, 255)
         col.setNamedColor('#d4d4d4')
         qp.setPen(col)
