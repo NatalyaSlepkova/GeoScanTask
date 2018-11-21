@@ -1,48 +1,38 @@
-from itertools import repeat
 import sys
-from collections import deque
 from visualization import MyWidget
 from PyQt5 import QtWidgets
 
 
-def get_water_line(l, r, climbs):
-    ans = []
-    dq = deque([(0, l)])
-    for (h, i) in climbs:
-        while len(dq) >= 2:
-            if dq[-1][0] < dq[-2][0] and dq[-1][0] < h:
-                dq.pop()
-            else:
-                break
-        dq.append((h, i))
-    dq.append((0, r))
-    for i in range(1, len(dq)):
-        ans.extend(repeat(min(dq[i - 1][0], dq[i][0]), dq[i][1] - dq[i - 1][1]))
+def get_partial_max(h):
+    ans = [h[0]]
+    for cur_h in h[1:]:
+        ans.append(max(ans[-1], cur_h))
+    return ans
+
+
+def get_water_line(l, r, h):
+    segm_h = h[l:r + 1]
+    max_pref = get_partial_max(segm_h)
+    segm_h.reverse()
+    max_suff = get_partial_max(segm_h)
+    max_suff.reverse()
+    segm_h.reverse()
+    ans = [0]
+    for i in range(1, len(segm_h) - 1):
+        ans.append(max(segm_h[i], min(max_pref[i - 1], max_suff[i + 1])) - segm_h[i])
     ans.append(0)
     return ans
 
 
 def count_water(h_tower):
-    climbs = []
-    h_tower = [0] + h_tower
-    h_tower.append(0)
-    water_line = []
-    cur_pos = 1
-    for i in range(1, len(h_tower) - 1):
-        if h_tower[i] > h_tower[i - 1] and h_tower[i] > h_tower[i + 1]:
-            climbs.append((h_tower[i], i))
-        if h_tower[i] == 0:
-            l = get_water_line(cur_pos, i, climbs)
-            water_line.extend(l)
-            climbs = []
+    cur_pos = 0
+    h_water = []
+    for i, h in enumerate(h_tower):
+        if h == 0 or i == len(h_tower) - 1:
+            l = get_water_line(cur_pos, i, h_tower)
+            h_water.extend(l)
             cur_pos = i + 1
-
-    l = get_water_line(cur_pos, len(h_tower) - 2, climbs)
-    water_line.extend(l)
-    h_water_add = []
-    for i, hw in enumerate(water_line):
-        h_water_add.append(max(0, hw - h_tower[i + 1]))
-    return h_water_add
+    return h_water
 
 
 if __name__ == '__main__':
